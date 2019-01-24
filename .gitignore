@@ -3,3 +3,5 @@
 
 dc
 *.exe
+*.linux
+*.osx
