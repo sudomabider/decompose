@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"errors"
 	"flag"
 	"fmt"
@@ -58,30 +57,11 @@ func main() {
 	info("COMPOSE_PROJECT_NAME=%s", projectName)
 	cmd.Env = append(os.Environ(), fmt.Sprintf("COMPOSE_PROJECT_NAME=%s", projectName))
 
-	stdout, err := cmd.StdoutPipe()
-	handleError(err)
-	scannerStd := bufio.NewScanner(stdout)
-	go func() {
-		for scannerStd.Scan() {
-			fmt.Println(scannerStd.Text())
-		}
-	}()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
 
-	stderr, err := cmd.StderrPipe()
-	handleError(err)
-	scannerErr := bufio.NewScanner(stderr)
-	go func() {
-		for scannerErr.Scan() {
-			fmt.Println(scannerErr.Text())
-		}
-	}()
-
-	fmt.Println("")
-	_ = cmd.Start()
-	// handleError(err)
-
-	_ = cmd.Wait()
-	// handleError(err)
+	cmd.Run()
 }
 
 func info(s string, args ...interface{}) {
