@@ -94,11 +94,9 @@ func getEnv() string {
 func getArgs() []string {
 	args := make([]string, 0)
 	values := os.Args[1:]
-	fmt.Printf("args are: %v", values)
 
 	for _, v := range values {
 		// remove internal flags
-		fmt.Println(v)
 		if !isOwnFlag(v) {
 			args = append(args, v)
 		}
