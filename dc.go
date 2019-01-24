@@ -18,7 +18,7 @@ var verbose bool
 var flags = [...]string{"composeDirName", "baseCompose", "env", "debug"}
 
 func main() {
-	flag.StringVar(&composeDirName, "composeDirName", "compose", "Name of directory containing docker compose files")
+	flag.StringVar(&composeDirName, "composeDirName", ".compose", "Name of directory containing docker compose files")
 	flag.StringVar(&baseCompose, "baseCompose", "docker-compose.default.yml", "The base docker compose file")
 	flag.StringVar(&env, "env", "devel", "Environment that docker compose is running in")
 	flag.BoolVar(&verbose, "debug", false, "Environment that docker compose is running in")
