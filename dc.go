@@ -108,7 +108,7 @@ func getArgs() []string {
 
 func isOwnFlag(f string) bool {
 	for _, v := range flags {
-		if match, _ := regexp.MatchString("^-?-"+v+"=.*$", f); match {
+		if match, _ := regexp.MatchString("^-?-"+v+"=?.*$", f); match {
 			return true
 		}
 	}
