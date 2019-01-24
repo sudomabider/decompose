@@ -18,7 +18,7 @@ var verbose bool
 var flags = [...]string{"composeDirName", "baseCompose", "env", "debug"}
 
 func main() {
-	flag.StringVar(&composeDirName, "composeDirName", ".compose", "Name of directory containing docker compose files")
+	flag.StringVar(&composeDirName, "composeDirName", "compose", "Name of directory containing docker compose files")
 	flag.StringVar(&baseCompose, "baseCompose", "docker-compose.default.yml", "The base docker compose file")
 	flag.StringVar(&env, "env", "devel", "Environment that docker compose is running in")
 	flag.BoolVar(&verbose, "debug", false, "Environment that docker compose is running in")
@@ -71,7 +71,7 @@ func info(s string, args ...interface{}) {
 
 func debug(s string, args ...interface{}) {
 	if verbose {
-		fmt.Printf("[DEBUG] "+s+"\n", args...)
+		fmt.Printf("[dc] "+s+"\n", args...)
 	}
 }
 
@@ -108,7 +108,7 @@ func getArgs() []string {
 
 func isOwnFlag(f string) bool {
 	for _, v := range flags {
-		if match, _ := regexp.MatchString("^-?-"+v+"=.+", f); match {
+		if match, _ := regexp.MatchString("^-?-"+v+"=.*$", f); match {
 			return true
 		}
 	}
@@ -118,7 +118,7 @@ func isOwnFlag(f string) bool {
 
 func findComposeDIr(cwd, name string) (string, error) {
 	// Assuming compose dir cannot be at root
-	if cwd == "" {
+	if cwd == "" || cwd == "." || cwd == "/" {
 		return "", fmt.Errorf("cannot find the compose directory")
 	}
 
@@ -128,6 +128,7 @@ func findComposeDIr(cwd, name string) (string, error) {
 	if err != nil {
 		// Keep searching up
 		up, _ := path.Split(cwd)
+		up = path.Clean(up)
 		return findComposeDIr(up, name)
 	}
 
