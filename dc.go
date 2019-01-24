@@ -15,13 +15,13 @@ import (
 var composeDirName, baseCompose, env string
 var verbose bool
 
-var flags = [...]string{"-composeDirName", "-baseCompose", "-env", "-v"}
+var flags = [...]string{"composeDirName", "baseCompose", "env", "debug"}
 
 func main() {
 	flag.StringVar(&composeDirName, "composeDirName", ".compose", "Name of directory containing docker compose files")
 	flag.StringVar(&baseCompose, "baseCompose", "docker-compose.default.yml", "The base docker compose file")
 	flag.StringVar(&env, "env", "devel", "Environment that docker compose is running in")
-	flag.BoolVar(&verbose, "v", false, "Environment that docker compose is running in")
+	flag.BoolVar(&verbose, "debug", false, "Environment that docker compose is running in")
 	flag.Parse()
 
 	pwd, err := os.Getwd()
@@ -94,11 +94,12 @@ func getEnv() string {
 func getArgs() []string {
 	args := make([]string, 0)
 	values := os.Args[1:]
+	fmt.Printf("args are: %v", values)
 
 	for _, v := range values {
-		// remove flags
-		match, _ := regexp.MatchString("^-", v)
-		if !match || !isOwnFlag(v) {
+		// remove internal flags
+		fmt.Println(v)
+		if !isOwnFlag(v) {
 			args = append(args, v)
 		}
 	}
@@ -108,7 +109,7 @@ func getArgs() []string {
 
 func isOwnFlag(f string) bool {
 	for _, v := range flags {
-		if v == f {
+		if match, _ := regexp.MatchString("-"+v+"=.+", f); match {
 			return true
 		}
 	}
