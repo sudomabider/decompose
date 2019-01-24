@@ -34,7 +34,7 @@ func main() {
 	if err != nil {
 		handleError(err)
 	}
-	info("Use compose directory %s", composeDir)
+	info("Using compose directory %s", composeDir)
 
 	debug("Looking for %s", baseCompose)
 	baseComposePath := path.Join(composeDir, baseCompose)
@@ -51,21 +51,22 @@ func main() {
 
 	args := []string{"-f", baseComposePath, "-f", envComposePath}
 	args = append(args, getArgs()...)
-	info("Executing: %s", strings.Join(append([]string{"docker-compose"}, args...), " "))
 	cmd := exec.Command("docker-compose", args...)
 	projectName := filepath.Base(filepath.Dir(composeDir)) + "-" + env
 	info("COMPOSE_PROJECT_NAME=%s", projectName)
 	cmd.Env = append(os.Environ(), fmt.Sprintf("COMPOSE_PROJECT_NAME=%s", projectName))
+	info("Executing: %s", strings.Join(append([]string{"docker-compose"}, args...), " "))
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 
+	fmt.Println("")
 	cmd.Run()
 }
 
 func info(s string, args ...interface{}) {
-	fmt.Printf("[INFO] "+s+"\n", args...)
+	fmt.Printf("[dc] "+s+"\n", args...)
 }
 
 func debug(s string, args ...interface{}) {
