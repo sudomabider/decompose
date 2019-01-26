@@ -8,21 +8,20 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 )
 
 var composeDirName, baseCompose, env string
-var verbose bool
-
-var flags = [...]string{"composeDirName", "baseCompose", "env", "debug"}
+var debug bool
 
 func main() {
 	flag.StringVar(&composeDirName, "composeDirName", ".compose", "Name of directory containing docker compose files")
 	flag.StringVar(&baseCompose, "baseCompose", "docker-compose.default.yml", "The base docker compose file")
 	flag.StringVar(&env, "env", "devel", "Environment that docker compose is running in")
-	flag.BoolVar(&verbose, "debug", false, "Environment that docker compose is running in")
+	flag.BoolVar(&debug, "debug", false, "Print debug messages")
 	flag.Parse()
+
+	printDebug("Using flags [composeDirName=%v, baseCompose=%v, env=%v]", composeDirName, baseCompose, env)
 
 	pwd, err := os.Getwd()
 	pwd = filepath.ToSlash(pwd)
@@ -30,32 +29,32 @@ func main() {
 		handleError(err)
 	}
 
+	printDebug("Looking for compose directory")
 	composeDir, err := findComposeDIr(pwd, composeDirName)
 	if err != nil {
 		handleError(err)
 	}
-	info("Using compose directory %s", composeDir)
+	printDebug("Using directory [%s]", composeDir)
 
-	debug("Looking for %s", baseCompose)
+	printDebug("Looking for [%s]", baseCompose)
 	baseComposePath := path.Join(composeDir, baseCompose)
 	if _, err := os.Stat(baseComposePath); err != nil {
 		handleError(errors.New(baseCompose + " does not exist"))
 	}
 
 	envCompose := composeFile(env)
-	debug("Looking for %s", envCompose)
+	printDebug("Looking for [%s]", envCompose)
 	envComposePath := path.Join(composeDir, envCompose)
 	if _, err := os.Stat(envComposePath); err != nil {
 		handleError(errors.New(envCompose + " does not exist"))
 	}
 
-	args := []string{"-f", baseComposePath, "-f", envComposePath}
-	args = append(args, getArgs()...)
+	args := append([]string{"-f", baseComposePath, "-f", envComposePath}, flag.Args()...)
 	cmd := exec.Command("docker-compose", args...)
 	projectName := filepath.Base(filepath.Dir(composeDir)) + "-" + env
-	info("COMPOSE_PROJECT_NAME=%s", projectName)
+	printDebug("Using project name [%s]", projectName)
 	cmd.Env = append(os.Environ(), fmt.Sprintf("COMPOSE_PROJECT_NAME=%s", projectName))
-	info("Executing: %s", strings.Join(append([]string{"docker-compose"}, args...), " "))
+	printDebug("Executing [%s]", strings.Join(append([]string{"docker-compose"}, args...), " "))
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -65,13 +64,9 @@ func main() {
 	cmd.Run()
 }
 
-func info(s string, args ...interface{}) {
-	fmt.Printf("[dc] "+s+"\n", args...)
-}
-
-func debug(s string, args ...interface{}) {
-	if verbose {
-		fmt.Printf("[dc] "+s+"\n", args...)
+func printDebug(s string, args ...interface{}) {
+	if debug {
+		fmt.Printf("debug | "+s+"\n", args...)
 	}
 }
 
@@ -92,30 +87,6 @@ func getEnv() string {
 	return "devel"
 }
 
-func getArgs() []string {
-	args := make([]string, 0)
-	values := os.Args[1:]
-
-	for _, v := range values {
-		// remove internal flags
-		if !isOwnFlag(v) {
-			args = append(args, v)
-		}
-	}
-
-	return args
-}
-
-func isOwnFlag(f string) bool {
-	for _, v := range flags {
-		if match, _ := regexp.MatchString("^-?-"+v+"=?.*$", f); match {
-			return true
-		}
-	}
-
-	return false
-}
-
 func findComposeDIr(cwd, name string) (string, error) {
 	// Assuming compose dir cannot be at root
 	if cwd == "" || cwd == "." || cwd == "/" {
@@ -123,7 +94,7 @@ func findComposeDIr(cwd, name string) (string, error) {
 	}
 
 	p := path.Join(cwd, name)
-	debug("Trying path %s", p)
+	printDebug("Trying path [%s]", p)
 	_, err := os.Stat(p)
 	if err != nil {
 		// Keep searching up
