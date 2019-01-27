@@ -77,16 +77,6 @@ func handleError(err error) {
 	}
 }
 
-func getEnv() string {
-	env := os.Getenv("ENVIRONMENT")
-
-	if env != "" {
-		return env
-	}
-
-	return "devel"
-}
-
 func findComposeDIr(cwd, name string) (string, error) {
 	// Assuming compose dir cannot be at root
 	if cwd == "" || cwd == "." || cwd == "/" {
