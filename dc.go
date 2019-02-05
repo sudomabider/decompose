@@ -17,7 +17,7 @@ var debug bool
 func main() {
 	flag.StringVar(&composeDirName, "composeDirName", ".compose", "Name of directory containing docker compose files")
 	flag.StringVar(&baseCompose, "baseCompose", "docker-compose.default.yml", "The base docker compose file")
-	flag.StringVar(&env, "env", "devel", "Environment that docker compose is running in")
+	flag.StringVar(&env, "env", "devel", "Environment that docker compose is running in. Will try to read the ENVIRONMENT env variable if not provided.")
 	flag.BoolVar(&debug, "debug", false, "Print debug messages")
 	flag.Parse()
 
