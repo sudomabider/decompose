@@ -61,7 +61,9 @@ func main() {
 	cmd.Stdin = os.Stdin
 
 	fmt.Println("")
-	cmd.Run()
+
+	err = cmd.Run()
+	handleError(err)
 }
 
 func printDebug(s string, args ...interface{}) {
