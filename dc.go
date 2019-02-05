@@ -21,6 +21,10 @@ func main() {
 	flag.BoolVar(&debug, "debug", false, "Print debug messages")
 	flag.Parse()
 
+	if os.Getenv("ENVIRONMENT") != "" {
+		env = os.Getenv("ENVIRONMENT")
+	}
+
 	printDebug("Using flags [composeDirName=%v, baseCompose=%v, env=%v]", composeDirName, baseCompose, env)
 
 	pwd, err := os.Getwd()
